@@ -1,6 +1,7 @@
-#include "Scene1.h"
+#include "Scene2.h"
+#include "Scene2.h"
 
-Scene1::Scene1(SDL_Window* sdlWindow_, GameManager* game_){
+Scene2::Scene2(SDL_Window* sdlWindow_, GameManager* game_){
 	window = sdlWindow_;
     game = game_;
 	renderer = SDL_GetRenderer(window);
@@ -12,11 +13,12 @@ Scene1::Scene1(SDL_Window* sdlWindow_, GameManager* game_){
 	fygar2 = nullptr;
 	fygar3 = nullptr;
 	fygar4 = nullptr;
+	pooka = nullptr;
 }
 
-Scene1::~Scene1() {}
+Scene2::~Scene2() {}
 
-bool Scene1::OnCreate() {
+bool Scene2::OnCreate() {
 	int w, h;
 	SDL_GetWindowSize(window,&w,&h);
 	
@@ -76,12 +78,22 @@ bool Scene1::OnCreate() {
 	fygar4->getBody()->setRotation(5.5f);
 	align = Align(fygar4->getBody(), game->getPlayer(), 1.0f, 1.0f, 1.5f, 2.0f, 0.4f);
 
+	pooka = new Character();
+
+	if (!pooka->OnCreate(this) || !pooka->setTextureWith("pooka.png"))
+	{
+		return false;
+	}
+	pooka->getBody()->setmaxspeed(2);
 	// end of character set ups
+
+	noderend = NodeRenderer(renderer, projectionMatrix);
+	noderend.CreateNodes(graph, 25, 15);
 
 	return true;
 }
 
-void Scene1::OnDestroy() 
+void Scene2::OnDestroy() 
 {
 	if (fygar1)
 	{
@@ -103,9 +115,23 @@ void Scene1::OnDestroy()
 		fygar4->OnDestroy();
 		delete fygar4;
 	}
+	if (pooka)
+	{
+		pooka->OnDestroy();
+		delete pooka;
+	}
 }
 
-void Scene1::Update(const float deltaTime) {
+void Scene2::Update(const float deltaTime) {
+
+	if (path.currentNode >= path.nodes.size()) {
+		auto pookapos = pooka->getBody()->getPos();
+		std::cout << "Goal reached: \n";
+		auto playerpos = game->getPlayer()->getPos();
+		path = findpath(graph, graph.getNearestNode({pookapos.x, pookapos.y}), graph.getNearestNode({playerpos.x, playerpos.y}));
+	}
+
+	// Adjust for current velocity to create the final steering output
 	// Calculate and apply any steering for npc's
 	auto steer = seek.getSteering();
 	fygar1->Update(deltaTime, steer);
@@ -119,26 +145,30 @@ void Scene1::Update(const float deltaTime) {
 	steer = align.getSteering();
 	fygar4->Update(deltaTime, steer);
 
+	steer = path.getsteering(game->getPlayer());
+	pooka->Update(deltaTime, steer);
+
 	// Update player
 	game->getPlayer()->Update(deltaTime);
 }
 
-void Scene1::Render() {
+void Scene2::Render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
-
+	noderend.render(graph);
 	// render any npc's
 	fygar1->render(0.2f);
 	fygar2->render(0.2f);
 	fygar3->render(0.2f);
 	fygar4->render(0.2f);
+	pooka->render(0.2f);
 	// render the player
 	game->RenderPlayer(0.25f);
 
 	SDL_RenderPresent(renderer);
 }
 
-void Scene1::HandleEvents(const SDL_Event& event)
+void Scene2::HandleEvents(const SDL_Event& event)
 {
 	// send events to npc's as needed
 

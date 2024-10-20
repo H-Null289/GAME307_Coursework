@@ -98,3 +98,8 @@ void Body::setPos( Vec3 pos_ )
 {
     pos = pos_;
 }
+
+void Body::setRotation(float roti)
+{
+    rotation = roti;
+}

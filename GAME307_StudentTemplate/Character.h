@@ -20,13 +20,16 @@ public:
 		body = NULL;
 		scene = NULL;
 	};
-
+	KinematicBody* getBody() {
+		return body;
+	}
 	~Character() {};
 
 	bool OnCreate(Scene* scene_);
 	void OnDestroy();
 	bool setTextureWith(string file);
 	void Update(float time);
+	void Update(float time, SteeringOutput steerout);
 	void HandleEvents(const SDL_Event& event);
 	void render(float scale = 1.0f) const;
 

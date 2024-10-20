@@ -12,7 +12,12 @@ protected:
 public:
 	KinematicBody() : Body{}
 	{}
-
+	void setmaxspeed(float maxspeed) {
+		maxSpeed = maxspeed;
+	}
+	void setmaxacceleration(float maxaccel) {
+		maxAcceleration = maxaccel;
+	}
 	KinematicBody(
 		Vec3 pos_, Vec3 vel_, Vec3 accel_,
 		float mass_,

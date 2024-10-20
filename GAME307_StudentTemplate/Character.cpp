@@ -87,6 +87,11 @@ void Character::Update(float deltaTime)
 	// (delete only those objects created in this function)
 }
 
+void Character::Update(float time, SteeringOutput steerout)
+{
+	body->Update(time, &steerout);
+}
+
 void Character::HandleEvents(const SDL_Event& event)
 {
 	// handle events here, if needed
